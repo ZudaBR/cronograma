@@ -1,49 +1,206 @@
-const CACHE = 'painel-v1';
-const FILES = ['/', '/index.html', '/manifest.json'];
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel YT Creator</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1D9E75" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f7; color: #1a1a1a; }
+    .app { max-width: 720px; margin: 0 auto; padding: 1rem; }
+    h1 { font-size: 18px; font-weight: 600; margin-bottom: 1rem; color: #1a1a1a; }
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0; }
+    .tab { padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; }
+    .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    @media(min-width:500px){ .metric-grid { grid-template-columns: repeat(4,1fr); } }
+    .metric { background: #f0f0ee; border-radius: 8px; padding: 12px 14px; }
+    .metric-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+    .metric-value { font-size: 22px; font-weight: 600; color: #1a1a1a; }
+    .metric-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .progress-bar { background: #e0e0e0; border-radius: 4px; height: 6px; margin: 8px 0 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .fill-hours { background: #1D9E75; }
+    .fill-subs { background: #378ADD; }
+    .section-title { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .task-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
+    .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: #fff; border: 1px solid #eee; border-radius: 8px; cursor: pointer; }
+    .task-item.done { opacity: 0.5; }
+    .task-check { width: 18px; height: 18px; border: 1.5px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 12px; }
+    .task-item.done .task-check { background: #1D9E75; border-color: #1D9E75; color: white; }
+    .task-name { font-size: 14px; }
+    .task-item.done .task-name { text-decoration: line-through; color: #aaa; }
+    .task-meta { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .task-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
+    .tag-pt { background: #E1F5EE; color: #0F6E56; }
+    .tag-es { background: #E6F1FB; color: #185FA5; }
+    .tag-geral { background: #FAEEDA; color: #854F0B; }
+    .add-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .add-row input, .add-row select { flex: 1; min-width: 120px; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 13px; background: #fff; color: #1a1a1a; outline: none; }
+    .add-row input:focus, .add-row select:focus { border-color: #1D9E75; }
+    .add-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid #ddd; background: none; cursor: pointer; font-size: 13px; color: #1a1a1a; white-space: nowrap; }
+    .add-btn:hover { background: #f0f0ee; }
+    .roadmap-list { display: flex; flex-direction: column; gap: 8px; }
+    .roadmap-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+    .roadmap-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .dot-done { background: #1D9E75; }
+    .dot-current { background: #378ADD; }
+    .dot-future { background: #ccc; }
+    .roadmap-content { flex: 1; }
+    .roadmap-period { font-size: 11px; color: #aaa; font-weight: 600; margin-bottom: 2px; }
+    .roadmap-goal { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+    .roadmap-detail { font-size: 12px; color: #888; margin-top: 2px; }
+    .roadmap-item.done-milestone { opacity: 0.55; }
+    .complete-btn { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid #ddd; background: none; cursor: pointer; color: #888; }
+    .complete-btn:hover { background: #f0f0ee; }
+    .video-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
+    .video-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+    .video-date { font-size: 11px; color: #aaa; width: 50px; flex-shrink: 0; }
+    .video-title { flex: 1; font-size: 13px; color: #1a1a1a; }
+    .video-stat { font-size: 12px; color: #888; white-space: nowrap; }
+    .channel-badge { font-size: 10px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 1.5rem; }
+    .cal-header { font-size: 10px; color: #aaa; text-align: center; padding: 4px 0; font-weight: 600; }
+    .cal-day { border-radius: 6px; border: 1px solid #eee; min-height: 60px; padding: 4px; background: #fff; }
+    .cal-day.empty { background: none; border-color: transparent; }
+    .cal-day.today { border-color: #378ADD; }
+    .cal-day-num { font-size: 10px; color: #888; margin-bottom: 3px; }
+    .cal-day.today .cal-day-num { color: #378ADD; font-weight: 600; }
+    .event-pill { font-size: 9px; padding: 1px 4px; border-radius: 2px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pill-pt { background: #E1F5EE; color: #0F6E56; }
+    .pill-es { background: #E6F1FB; color: #185FA5; }
+    .pill-task { background: #FAEEDA; color: #854F0B; }
+    .pill-done { background: #EAF3DE; color: #3B6D11; }
+    .chat-section { border: 1px solid #eee; border-radius: 12px; overflow: hidden; }
+    .chat-history { padding: 12px; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .chat-msg { padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; max-width: 90%; }
+    .msg-user { background: #f0f0ee; align-self: flex-end; }
+    .msg-ai { background: #fff; border: 1px solid #eee; align-self: flex-start; }
+    .msg-thinking { color: #aaa; font-style: italic; }
+    .chat-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #eee; background: #f9f9f7; }
+    .chat-input-row textarea { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 13px; resize: none; background: #fff; color: #1a1a1a; min-height: 38px; font-family: inherit; outline: none; }
+    .chat-input-row textarea:focus { border-color: #1D9E75; }
+    .send-btn { padding: 8px 16px; border-radius: 8px; border: none; background: #1a1a1a; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .empty-state { text-align: center; padding: 2rem; color: #aaa; font-size: 13px; }
+    .legend-row { display: flex; gap: 12px; font-size: 12px; color: #888; margin-bottom: 1rem; flex-wrap: wrap; }
+    .legend-pill { padding: 1px 8px; border-radius: 3px; font-size: 11px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>📊 Painel YT Creator</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Visão geral</button>
+    <button class="tab" onclick="switchTab('calendar')">Calendário</button>
+    <button class="tab" onclick="switchTab('tasks')">Tarefas</button>
+    <button class="tab" onclick="switchTab('roadmap')">Roadmap</button>
+    <button class="tab" onclick="switchTab('videos')">Vídeos</button>
+    <button class="tab" onclick="switchTab('assistant')">Assistente</button>
+  </div>
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(FILES))
-  );
-});
+  <div id="tab-overview" class="panel active">
+    <div class="section-title">Progresso para monetização</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Horas assistidas</div><div class="metric-value" id="m-hours">441</div><div class="progress-bar"><div class="progress-fill fill-hours" id="bar-hours" style="width:11%"></div></div><div class="metric-sub">Meta: 4.000h · <span id="pct-hours">11%</span></div></div>
+      <div class="metric"><div class="metric-label">Inscritos</div><div class="metric-value" id="m-subs">23</div><div class="progress-bar"><div class="progress-fill fill-subs" id="bar-subs" style="width:2%"></div></div><div class="metric-sub">Meta: 1.000 · <span id="pct-subs">2.3%</span></div></div>
+      <div class="metric"><div class="metric-label">Vídeos publicados</div><div class="metric-value" id="m-videos">3</div><div class="metric-sub">Canal PT em maio</div></div>
+      <div class="metric"><div class="metric-label">Canais ativos</div><div class="metric-value" id="m-channels">1</div><div class="metric-sub">PT · ES em breve</div></div>
+    </div>
+    <div class="section-title">Atualizar métricas</div>
+    <div class="add-row">
+      <input type="number" id="inp-hours" placeholder="Horas assistidas" />
+      <input type="number" id="inp-subs" placeholder="Inscritos" />
+      <input type="number" id="inp-videos" placeholder="Vídeos publicados" />
+      <button class="add-btn" onclick="updateMetrics()">Salvar</button>
+    </div>
+    <div class="section-title">Próximas tarefas</div>
+    <div id="upcoming-list" class="task-list"></div>
+  </div>
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
-});
-{
-  "name": "Painel YT Creator",
-  "short_name": "Meu Painel",
-  "description": "Controle de canais YouTube",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1D9E75",
-  "icons": [
-    {
-      "src": "https://via.placeholder.com/192x192/1D9E75/ffffff?text=YT",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://via.placeholder.com/512x512/1D9E75/ffffff?text=YT",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
-const CACHE = 'painel-v1';
-const FILES = ['/', '/index.html', '/manifest.json'];
+  <div id="tab-calendar" class="panel">
+    <div class="section-title">Maio 2026</div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="legend-row">
+      <span><span class="legend-pill pill-pt">PT</span> Canal português</span>
+      <span><span class="legend-pill pill-es">ES</span> Canal espanhol</span>
+      <span><span class="legend-pill pill-task">Tarefa</span> Meta do mês</span>
+      <span><span class="legend-pill pill-done">Feito</span> Publicado</span>
+    </div>
+  </div>
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(FILES))
-  );
-});
+  <div id="tab-tasks" class="panel">
+    <div class="section-title">Tarefas de maio</div>
+    <div class="add-row">
+      <input type="text" id="inp-task" placeholder="Nova tarefa..." style="flex:2" />
+      <select id="inp-task-tag"><option value="PT">Canal PT</option><option value="ES">Canal ES</option><option value="Geral">Geral</option></select>
+      <button class="add-btn" onclick="addTask()">+ Adicionar</button>
+    </div>
+    <div class="task-list" id="task-list"></div>
+  </div>
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
-  );
-});
+  <div id="tab-roadmap" class="panel">
+    <div class="section-title">Plano geral — maio 2026 a novembro 2027</div>
+    <div class="roadmap-list" id="roadmap-list"></div>
+  </div>
+
+  <div id="tab-videos" class="panel">
+    <div class="section-title">Registrar vídeo publicado</div>
+    <div class="add-row">
+      <input type="text" id="inp-vtitle" placeholder="Título do vídeo" style="flex:2" />
+      <input type="text" id="inp-vdate" placeholder="Data (ex: 09/05)" style="max-width:90px" />
+      <select id="inp-vchannel"><option value="PT">PT</option><option value="ES">ES</option><option value="EN">EN</option></select>
+      <button class="add-btn" onclick="addVideo()">Salvar</button>
+    </div>
+    <div class="video-list" id="video-list"></div>
+  </div>
+
+  <div id="tab-assistant" class="panel">
+    <p style="font-size:13px;color:#888;margin-bottom:1rem;">Converse com o assistente sobre seu projeto.</p>
+    <div class="chat-section">
+      <div class="chat-history" id="chat-history">
+        <div class="chat-msg msg-ai">Olá! Estou por dentro do seu projeto — canal de Relatos Realistas em PT, plano de expansão para ES e depois EN, e a meta de monetização. O que você quer discutir ou atualizar?</div>
+      </div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" placeholder="Pergunte algo ou atualize o plano..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendChat()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATE_KEY='yt_project_v2';
+const defaultState={metrics:{hours:441,subs:23,videos:3,channels:1},tasks:[{id:1,text:'Criar roteiro — vídeo quarta 14/05',tag:'PT',done:false},{id:2,text:'Publicar vídeo — quarta 14/05',tag:'PT',done:false},{id:3,text:'Avaliar performance do vídeo 3 (após 3 dias)',tag:'PT',done:false},{id:4,text:'Adaptar melhor história para o canal ES',tag:'ES',done:false},{id:5,text:'Criar canal no YouTube em espanhol',tag:'ES',done:false},{id:6,text:'Publicar vídeo — sábado 17/05',tag:'PT',done:false},{id:7,text:'Publicar vídeo — quarta 21/05',tag:'PT',done:false},{id:8,text:'Primeiro vídeo canal ES — sábado 24/05',tag:'ES',done:false},{id:9,text:'Publicar vídeo — sábado 31/05',tag:'PT',done:false}],videos:[{id:1,title:'Meu Marido e Minha Melhor Amiga Me Roubaram — Eu Cobrei na Frente de Todo Mundo',date:'02/05',channel:'PT',views:291},{id:2,title:'ELA PLANEJOU A SAÍDA. NÃO SABIA QUE EU JÁ TINHA PLANEJADO...',date:'06/05',channel:'PT',views:2451},{id:3,title:'Ele Escreveu No Celular: Ela Não Desconfia De Nada. Então Eu...',date:'09/05',channel:'PT',views:5}],roadmap:[{id:1,period:'Maio 2026',goal:'Estabelecer ritmo de publicação (quarta e sábado)',detail:'Meta: 8 vídeos no mês, lançar canal ES',done:false},{id:2,period:'Junho 2026',goal:'Consistência e análise de dados',detail:'Identificar formatos que mais retêm, otimizar thumbnails e títulos',done:false},{id:3,period:'Julho 2026',goal:'Escalar produção PT + consolidar ES',detail:'Canal ES com 4+ vídeos, PT acumulando horas assistidas',done:false},{id:4,period:'Agosto 2026',goal:'Marca de 1.000 inscritos',detail:'Se o ritmo do vídeo 2 se repetir, pode chegar antes do previsto',done:false},{id:5,period:'Setembro–Outubro 2026',goal:'Atingir 4.000 horas assistidas',detail:'Solicitar revisão do canal para monetização AdSense',done:false},{id:6,period:'Novembro 2026',goal:'Monetização ativa no canal PT',detail:'Primeiras receitas de AdSense, patrocínios diretos em paralelo',done:false},{id:7,period:'Janeiro 2027',goal:'Criar Apoia.se para o canal PT',detail:'Conteúdo exclusivo para apoiadores, bastidores e histórias extras',done:false},{id:8,period:'Março 2027',goal:'Canal ES monetizado',detail:'Meta de 4.000h assistidas no canal ES',done:false},{id:9,period:'Junho 2027',goal:'Lançar canal EN',detail:'Histórias adaptadas culturalmente, foco em folclore brasileiro',done:false},{id:10,period:'Novembro 2027',goal:'Operação multicanal estável',detail:'PT + ES + EN gerando receita',done:false}],chatHistory:[]};
+let state=JSON.parse(JSON.stringify(defaultState));
+function loadState(){try{const s=localStorage.getItem(STATE_KEY);if(s)state=JSON.parse(s);}catch(e){}render();}
+function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify(state));}catch(e){}}
+function switchTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick').includes(id))t.classList.add('active');});document.getElementById('tab-'+id).classList.add('active');}
+function render(){renderMetrics();renderCalendar();renderTasks();renderRoadmap();renderVideos();renderUpcoming();}
+function renderMetrics(){const m=state.metrics;document.getElementById('m-hours').textContent=m.hours.toLocaleString('pt-BR');document.getElementById('m-subs').textContent=m.subs.toLocaleString('pt-BR');document.getElementById('m-videos').textContent=m.videos;document.getElementById('m-channels').textContent=m.channels;const ph=Math.min(Math.round(m.hours/40),100);const ps=Math.min(Math.round(m.subs/10),100);document.getElementById('bar-hours').style.width=ph+'%';document.getElementById('bar-subs').style.width=ps+'%';document.getElementById('pct-hours').textContent=ph+'%';document.getElementById('pct-subs').textContent=(m.subs/10).toFixed(1)+'%';}
+function renderUpcoming(){const pending=state.tasks.filter(t=>!t.done).slice(0,3);const el=document.getElementById('upcoming-list');if(!pending.length){el.innerHTML='<div class="empty-state">Nenhuma tarefa pendente 🎉</div>';return;}el.innerHTML=pending.map(t=>taskHTML(t)).join('');}
+const tagClass={PT:'tag-pt',ES:'tag-es',Geral:'tag-geral'};
+function taskHTML(t){return`<div class="task-item ${t.done?'done':''}" onclick="toggleTask(${t.id})"><div class="task-check">${t.done?'✓':''}</div><div style="flex:1"><div class="task-name">${t.text}</div><div class="task-meta"><span class="task-tag ${tagClass[t.tag]||'tag-geral'}">${t.tag}</span></div></div></div>`;}
+function renderTasks(){const el=document.getElementById('task-list');el.innerHTML=state.tasks.map(t=>taskHTML(t)).join('')||'<div class="empty-state">Nenhuma tarefa.</div>';}
+function toggleTask(id){const t=state.tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveState();renderTasks();renderUpcoming();}}
+function addTask(){const text=document.getElementById('inp-task').value.trim();const tag=document.getElementById('inp-task-tag').value;if(!text)return;state.tasks.push({id:Date.now(),text,tag,done:false});document.getElementById('inp-task').value='';saveState();renderTasks();renderUpcoming();}
+function updateMetrics(){const h=parseFloat(document.getElementById('inp-hours').value);const s=parseFloat(document.getElementById('inp-subs').value);const v=parseFloat(document.getElementById('inp-videos').value);if(!isNaN(h))state.metrics.hours=h;if(!isNaN(s))state.metrics.subs=s;if(!isNaN(v))state.metrics.videos=v;document.getElementById('inp-hours').value='';document.getElementById('inp-subs').value='';document.getElementById('inp-videos').value='';saveState();renderMetrics();}
+const calEvents={2:[{label:'Vídeo 1 publicado',cls:'pill-done'}],6:[{label:'Vídeo 2 publicado',cls:'pill-done'}],9:[{label:'Vídeo 3 publicado',cls:'pill-done'}],10:[{label:'Início do plano',cls:'pill-task'}],14:[{label:'Publicar PT',cls:'pill-pt'}],17:[{label:'Publicar PT',cls:'pill-pt'}],21:[{label:'Publicar PT',cls:'pill-pt'}],24:[{label:'Publicar PT',cls:'pill-pt'},{label:'Lançar canal ES',cls:'pill-es'}],28:[{label:'Publicar PT',cls:'pill-pt'}],31:[{label:'Publicar PT',cls:'pill-pt'},{label:'Publicar ES',cls:'pill-es'}]};
+function renderCalendar(){const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let html=days.map(d=>`<div class="cal-header">${d}</div>`).join('');for(let i=0;i<5;i++)html+='<div class="cal-day empty"></div>';for(let d=1;d<=31;d++){const evs=calEvents[d]||[];html+=`<div class="cal-day ${d===9?'today':''}"><div class="cal-day-num">${d}</div>${evs.map(e=>`<div class="event-pill ${e.cls}">${e.label}</div>`).join('')}</div>`;}document.getElementById('cal-grid').innerHTML=html;}
+function renderRoadmap(){const el=document.getElementById('roadmap-list');el.innerHTML=state.roadmap.map(r=>`<div class="roadmap-item ${r.done?'done-milestone':''}"><div class="roadmap-dot ${r.done?'dot-done':r.id===1?'dot-current':'dot-future'}"></div><div class="roadmap-content"><div class="roadmap-period">${r.period}</div><div class="roadmap-goal">${r.goal}</div><div class="roadmap-detail">${r.detail}</div></div><button class="complete-btn" onclick="toggleMilestone(${r.id})">${r.done?'Desfazer':'Concluir'}</button></div>`).join('');}
+function toggleMilestone(id){const r=state.roadmap.find(r=>r.id===id);if(r){r.done=!r.done;saveState();renderRoadmap();}}
+function addVideo(){const title=document.getElementById('inp-vtitle').value.trim();const date=document.getElementById('inp-vdate').value.trim();const channel=document.getElementById('inp-vchannel').value;if(!title)return;state.videos.push({id:Date.now(),title,date:date||'—',channel,views:0});document.getElementById('inp-vtitle').value='';document.getElementById('inp-vdate').value='';saveState();renderVideos();}
+function renderVideos(){const el=document.getElementById('video-list');if(!state.videos.length){el.innerHTML='<div class="empty-state">Nenhum vídeo registrado.</div>';return;}const ch={PT:'background:#E1F5EE;color:#0F6E56',ES:'background:#E6F1FB;color:#185FA5',EN:'background:#FAEEDA;color:#854F0B'};el.innerHTML=[...state.videos].reverse().map(v=>`<div class="video-item"><div class="video-date">${v.date}</div><span class="channel-badge" style="${ch[v.channel]||ch.PT}">${v.channel}</span><div class="video-title">${v.title}</div>${v.views?`<div class="video-stat">${v.views.toLocaleString('pt-BR')} views</div>`:''}</div>`).join('');}
+const SYSTEM_PROMPT=`Você é um mentor e assistente de crescimento para um criador de conteúdo brasileiro no YouTube.\n\nContexto:\n- Canal principal: Relatos Realistas (amor, traição e vingança) — narração sem rosto, ficção\n- Canal ES planejado para maio 2026, canal EN no futuro\n- Meta: 4.000 horas assistidas + 1.000 inscritos para AdSense\n- Progresso: 3 vídeos, 441h assistidas, 23 inscritos\n- Vídeo de 06/05 foi hit com 2.451 views em 3 dias\n- Publicações: quartas e sábados\n\nResponda sempre em português brasileiro, de forma direta e prática.`;
+async function sendChat(){const input=document.getElementById('chat-input');const text=input.value.trim();if(!text)return;const btn=document.getElementById('send-btn');btn.disabled=true;input.value='';state.chatHistory.push({role:'user',content:text});const history=document.getElementById('chat-history');history.innerHTML+=`<div class="chat-msg msg-user">${text}</div>`;history.innerHTML+=`<div class="chat-msg msg-ai msg-thinking" id="thinking-msg">Pensando...</div>`;history.scrollTop=history.scrollHeight;try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:state.chatHistory})});const data=await res.json();const reply=data.content?.map(b=>b.text||'').join('')||'Erro.';state.chatHistory.push({role:'assistant',content:reply});document.getElementById('thinking-msg').outerHTML=`<div class="chat-msg msg-ai">${reply.replace(/\n/g,'<br>')}</div>`;}catch(e){document.getElementById('thinking-msg').outerHTML=`<div class="chat-msg msg-ai" style="color:#c0392b">Erro de conexão.</div>`;}history.scrollTop=history.scrollHeight;btn.disabled=false;if(state.chatHistory.length>20)state.chatHistory=state.chatHistory.slice(-20);saveState();}
+loadState();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
+</body>
+</html>

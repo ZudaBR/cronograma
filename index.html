@@ -59,12 +59,6 @@
     .roadmap-item.done-milestone { opacity: 0.55; }
     .complete-btn { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid #ddd; background: none; cursor: pointer; color: #888; }
     .complete-btn:hover { background: #f0f0ee; }
-    .video-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
-    .video-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fff; border: 1px solid #eee; border-radius: 8px; }
-    .video-date { font-size: 11px; color: #aaa; width: 50px; flex-shrink: 0; }
-    .video-title { flex: 1; font-size: 13px; color: #1a1a1a; }
-    .video-stat { font-size: 12px; color: #888; white-space: nowrap; }
-    .channel-badge { font-size: 10px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 1.5rem; }
     .cal-header { font-size: 10px; color: #aaa; text-align: center; padding: 4px 0; font-weight: 600; }
     .cal-day { border-radius: 6px; border: 1px solid #eee; min-height: 60px; padding: 4px; background: #fff; }
@@ -91,6 +85,26 @@
     .empty-state { text-align: center; padding: 2rem; color: #aaa; font-size: 13px; }
     .legend-row { display: flex; gap: 12px; font-size: 12px; color: #888; margin-bottom: 1rem; flex-wrap: wrap; }
     .legend-pill { padding: 1px 8px; border-radius: 3px; font-size: 11px; }
+    .yt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .refresh-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid #ddd; border-radius: 8px; background: none; cursor: pointer; font-size: 12px; color: #1a1a1a; }
+    .refresh-btn:hover { background: #f0f0ee; }
+    .yt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+    .yt-card { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px 14px; }
+    .yt-card-top { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+    .yt-thumb { width: 80px; height: 50px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #f0f0ee; }
+    .yt-info { flex: 1; }
+    .yt-title { font-size: 13px; font-weight: 500; color: #1a1a1a; line-height: 1.4; margin-bottom: 4px; }
+    .yt-date { font-size: 11px; color: #aaa; }
+    .yt-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .yt-stat { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666; }
+    .yt-stat-val { font-weight: 500; color: #1a1a1a; }
+    .channel-info { background: #f0f0ee; border-radius: 10px; padding: 14px; margin-bottom: 1.5rem; display: flex; gap: 14px; align-items: center; }
+    .channel-avatar { width: 48px; height: 48px; border-radius: 50%; background: #1D9E75; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .channel-name { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .channel-subs { font-size: 13px; color: #888; margin-top: 2px; }
+    .yt-error { background: #FCEBEB; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #A32D2D; margin-bottom: 1rem; }
+    .loading-state { text-align: center; padding: 2rem; color: #aaa; font-size: 13px; }
+    .last-updated { font-size: 11px; color: #aaa; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
@@ -98,30 +112,40 @@
   <h1>📊 Painel YT Creator</h1>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('overview')">Visão geral</button>
+    <button class="tab" onclick="switchTab('youtube')">YouTube</button>
     <button class="tab" onclick="switchTab('calendar')">Calendário</button>
     <button class="tab" onclick="switchTab('tasks')">Tarefas</button>
     <button class="tab" onclick="switchTab('roadmap')">Roadmap</button>
-    <button class="tab" onclick="switchTab('videos')">Vídeos</button>
     <button class="tab" onclick="switchTab('assistant')">Assistente</button>
   </div>
 
   <div id="tab-overview" class="panel active">
     <div class="section-title">Progresso para monetização</div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Horas assistidas</div><div class="metric-value" id="m-hours">441</div><div class="progress-bar"><div class="progress-fill fill-hours" id="bar-hours" style="width:11%"></div></div><div class="metric-sub">Meta: 4.000h · <span id="pct-hours">11%</span></div></div>
-      <div class="metric"><div class="metric-label">Inscritos</div><div class="metric-value" id="m-subs">23</div><div class="progress-bar"><div class="progress-fill fill-subs" id="bar-subs" style="width:2%"></div></div><div class="metric-sub">Meta: 1.000 · <span id="pct-subs">2.3%</span></div></div>
-      <div class="metric"><div class="metric-label">Vídeos publicados</div><div class="metric-value" id="m-videos">3</div><div class="metric-sub">Canal PT em maio</div></div>
-      <div class="metric"><div class="metric-label">Canais ativos</div><div class="metric-value" id="m-channels">1</div><div class="metric-sub">PT · ES em breve</div></div>
+      <div class="metric"><div class="metric-label">Horas assistidas</div><div class="metric-value" id="m-hours">—</div><div class="progress-bar"><div class="progress-fill fill-hours" id="bar-hours" style="width:0%"></div></div><div class="metric-sub">Meta: 4.000h · <span id="pct-hours">—</span></div></div>
+      <div class="metric"><div class="metric-label">Inscritos</div><div class="metric-value" id="m-subs">—</div><div class="progress-bar"><div class="progress-fill fill-subs" id="bar-subs" style="width:0%"></div></div><div class="metric-sub">Meta: 1.000 · <span id="pct-subs">—</span></div></div>
+      <div class="metric"><div class="metric-label">Views totais</div><div class="metric-value" id="m-views">—</div><div class="metric-sub">Canal PT</div></div>
+      <div class="metric"><div class="metric-label">Vídeos publicados</div><div class="metric-value" id="m-videos">—</div><div class="metric-sub">Canal PT</div></div>
     </div>
-    <div class="section-title">Atualizar métricas</div>
+    <div class="section-title">Horas assistidas (manual)</div>
     <div class="add-row">
       <input type="number" id="inp-hours" placeholder="Horas assistidas" />
-      <input type="number" id="inp-subs" placeholder="Inscritos" />
-      <input type="number" id="inp-videos" placeholder="Vídeos publicados" />
-      <button class="add-btn" onclick="updateMetrics()">Salvar</button>
+      <button class="add-btn" onclick="updateHours()">Salvar</button>
     </div>
     <div class="section-title">Próximas tarefas</div>
     <div id="upcoming-list" class="task-list"></div>
+  </div>
+
+  <div id="tab-youtube" class="panel">
+    <div class="yt-header">
+      <div class="section-title" style="margin-bottom:0">Dados do canal</div>
+      <button class="refresh-btn" id="refresh-btn" onclick="fetchYouTube()">↻ Atualizar</button>
+    </div>
+    <div id="yt-error" style="display:none"></div>
+    <div id="channel-info-box"></div>
+    <div id="yt-last-updated" class="last-updated"></div>
+    <div class="section-title">Vídeos recentes</div>
+    <div id="yt-list" class="yt-list"><div class="loading-state">Carregando vídeos...</div></div>
   </div>
 
   <div id="tab-calendar" class="panel">
@@ -150,17 +174,6 @@
     <div class="roadmap-list" id="roadmap-list"></div>
   </div>
 
-  <div id="tab-videos" class="panel">
-    <div class="section-title">Registrar vídeo publicado</div>
-    <div class="add-row">
-      <input type="text" id="inp-vtitle" placeholder="Título do vídeo" style="flex:2" />
-      <input type="text" id="inp-vdate" placeholder="Data (ex: 09/05)" style="max-width:90px" />
-      <select id="inp-vchannel"><option value="PT">PT</option><option value="ES">ES</option><option value="EN">EN</option></select>
-      <button class="add-btn" onclick="addVideo()">Salvar</button>
-    </div>
-    <div class="video-list" id="video-list"></div>
-  </div>
-
   <div id="tab-assistant" class="panel">
     <p style="font-size:13px;color:#888;margin-bottom:1rem;">Converse com o assistente sobre seu projeto.</p>
     <div class="chat-section">
@@ -176,28 +189,30 @@
 </div>
 
 <script>
-const STATE_KEY='yt_project_v2';
-const defaultState={metrics:{hours:441,subs:23,videos:3,channels:1},tasks:[{id:1,text:'Criar roteiro — vídeo quarta 14/05',tag:'PT',done:false},{id:2,text:'Publicar vídeo — quarta 14/05',tag:'PT',done:false},{id:3,text:'Avaliar performance do vídeo 3 (após 3 dias)',tag:'PT',done:false},{id:4,text:'Adaptar melhor história para o canal ES',tag:'ES',done:false},{id:5,text:'Criar canal no YouTube em espanhol',tag:'ES',done:false},{id:6,text:'Publicar vídeo — sábado 17/05',tag:'PT',done:false},{id:7,text:'Publicar vídeo — quarta 21/05',tag:'PT',done:false},{id:8,text:'Primeiro vídeo canal ES — sábado 24/05',tag:'ES',done:false},{id:9,text:'Publicar vídeo — sábado 31/05',tag:'PT',done:false}],videos:[{id:1,title:'Meu Marido e Minha Melhor Amiga Me Roubaram — Eu Cobrei na Frente de Todo Mundo',date:'02/05',channel:'PT',views:291},{id:2,title:'ELA PLANEJOU A SAÍDA. NÃO SABIA QUE EU JÁ TINHA PLANEJADO...',date:'06/05',channel:'PT',views:2451},{id:3,title:'Ele Escreveu No Celular: Ela Não Desconfia De Nada. Então Eu...',date:'09/05',channel:'PT',views:5}],roadmap:[{id:1,period:'Maio 2026',goal:'Estabelecer ritmo de publicação (quarta e sábado)',detail:'Meta: 8 vídeos no mês, lançar canal ES',done:false},{id:2,period:'Junho 2026',goal:'Consistência e análise de dados',detail:'Identificar formatos que mais retêm, otimizar thumbnails e títulos',done:false},{id:3,period:'Julho 2026',goal:'Escalar produção PT + consolidar ES',detail:'Canal ES com 4+ vídeos, PT acumulando horas assistidas',done:false},{id:4,period:'Agosto 2026',goal:'Marca de 1.000 inscritos',detail:'Se o ritmo do vídeo 2 se repetir, pode chegar antes do previsto',done:false},{id:5,period:'Setembro–Outubro 2026',goal:'Atingir 4.000 horas assistidas',detail:'Solicitar revisão do canal para monetização AdSense',done:false},{id:6,period:'Novembro 2026',goal:'Monetização ativa no canal PT',detail:'Primeiras receitas de AdSense, patrocínios diretos em paralelo',done:false},{id:7,period:'Janeiro 2027',goal:'Criar Apoia.se para o canal PT',detail:'Conteúdo exclusivo para apoiadores, bastidores e histórias extras',done:false},{id:8,period:'Março 2027',goal:'Canal ES monetizado',detail:'Meta de 4.000h assistidas no canal ES',done:false},{id:9,period:'Junho 2027',goal:'Lançar canal EN',detail:'Histórias adaptadas culturalmente, foco em folclore brasileiro',done:false},{id:10,period:'Novembro 2027',goal:'Operação multicanal estável',detail:'PT + ES + EN gerando receita',done:false}],chatHistory:[]};
+const YT_API_KEY='AIzaSyD0f0dLOalBlBBdJUL_GLSNtr9Ud7eO4RM';
+const CHANNEL_ID='UC2lxmtS44-2G8Y7B0CsnC_Q';
+const STATE_KEY='yt_project_v3';
+const defaultState={hours:441,tasks:[{id:1,text:'Criar roteiro — vídeo quarta 14/05',tag:'PT',done:false},{id:2,text:'Publicar vídeo — quarta 14/05',tag:'PT',done:false},{id:3,text:'Avaliar performance do vídeo 3 (após 3 dias)',tag:'PT',done:false},{id:4,text:'Adaptar melhor história para o canal ES',tag:'ES',done:false},{id:5,text:'Criar canal no YouTube em espanhol',tag:'ES',done:false},{id:6,text:'Publicar vídeo — sábado 17/05',tag:'PT',done:false},{id:7,text:'Publicar vídeo — quarta 21/05',tag:'PT',done:false},{id:8,text:'Primeiro vídeo canal ES — sábado 24/05',tag:'ES',done:false},{id:9,text:'Publicar vídeo — sábado 31/05',tag:'PT',done:false}],roadmap:[{id:1,period:'Maio 2026',goal:'Estabelecer ritmo de publicação (quarta e sábado)',detail:'Meta: 8 vídeos no mês, lançar canal ES',done:false},{id:2,period:'Junho 2026',goal:'Consistência e análise de dados',detail:'Identificar formatos que mais retêm, otimizar thumbnails e títulos',done:false},{id:3,period:'Julho 2026',goal:'Escalar produção PT + consolidar ES',detail:'Canal ES com 4+ vídeos, PT acumulando horas assistidas',done:false},{id:4,period:'Agosto 2026',goal:'Marca de 1.000 inscritos',detail:'Se o ritmo do vídeo 2 se repetir, pode chegar antes do previsto',done:false},{id:5,period:'Setembro–Outubro 2026',goal:'Atingir 4.000 horas assistidas',detail:'Solicitar revisão do canal para monetização AdSense',done:false},{id:6,period:'Novembro 2026',goal:'Monetização ativa no canal PT',detail:'Primeiras receitas de AdSense, patrocínios diretos em paralelo',done:false},{id:7,period:'Janeiro 2027',goal:'Criar Apoia.se para o canal PT',detail:'Conteúdo exclusivo para apoiadores, bastidores e histórias extras',done:false},{id:8,period:'Março 2027',goal:'Canal ES monetizado',detail:'Meta de 4.000h assistidas no canal ES',done:false},{id:9,period:'Junho 2027',goal:'Lançar canal EN',detail:'Histórias adaptadas culturalmente, foco em folclore brasileiro',done:false},{id:10,period:'Novembro 2027',goal:'Operação multicanal estável',detail:'PT + ES + EN gerando receita',done:false}],chatHistory:[],ytCache:null,ytCacheTime:null};
 let state=JSON.parse(JSON.stringify(defaultState));
-function loadState(){try{const s=localStorage.getItem(STATE_KEY);if(s)state=JSON.parse(s);}catch(e){}render();}
+function loadState(){try{const s=localStorage.getItem(STATE_KEY);if(s)state=JSON.parse(s);}catch(e){}render();fetchYouTube();}
 function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify(state));}catch(e){}}
 function switchTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick').includes(id))t.classList.add('active');});document.getElementById('tab-'+id).classList.add('active');}
-function render(){renderMetrics();renderCalendar();renderTasks();renderRoadmap();renderVideos();renderUpcoming();}
-function renderMetrics(){const m=state.metrics;document.getElementById('m-hours').textContent=m.hours.toLocaleString('pt-BR');document.getElementById('m-subs').textContent=m.subs.toLocaleString('pt-BR');document.getElementById('m-videos').textContent=m.videos;document.getElementById('m-channels').textContent=m.channels;const ph=Math.min(Math.round(m.hours/40),100);const ps=Math.min(Math.round(m.subs/10),100);document.getElementById('bar-hours').style.width=ph+'%';document.getElementById('bar-subs').style.width=ps+'%';document.getElementById('pct-hours').textContent=ph+'%';document.getElementById('pct-subs').textContent=(m.subs/10).toFixed(1)+'%';}
+function render(){renderMetrics();renderCalendar();renderTasks();renderRoadmap();renderUpcoming();if(state.ytCache)renderYouTube(state.ytCache);}
+async function fetchYouTube(){const btn=document.getElementById('refresh-btn');btn.textContent='↻ Buscando...';btn.style.opacity='0.5';document.getElementById('yt-error').style.display='none';try{const chRes=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${CHANNEL_ID}&key=${YT_API_KEY}`);const chData=await chRes.json();if(chData.error)throw new Error(chData.error.message);if(!chData.items||!chData.items.length)throw new Error('Canal não encontrado.');const channel=chData.items[0];const srRes=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&maxResults=10&order=date&type=video&key=${YT_API_KEY}`);const srData=await srRes.json();if(srData.error)throw new Error(srData.error.message);const videoIds=srData.items.map(i=>i.id.videoId).join(',');const vidRes=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds}&key=${YT_API_KEY}`);const vidData=await vidRes.json();if(vidData.error)throw new Error(vidData.error.message);const result={channel,videos:vidData.items};state.ytCache=result;state.ytCacheTime=new Date().toISOString();state.ytSubs=parseInt(channel.statistics.subscriberCount||0);state.ytViews=parseInt(channel.statistics.viewCount||0);state.ytVideos=parseInt(channel.statistics.videoCount||0);saveState();renderYouTube(result);renderMetrics();}catch(e){const el=document.getElementById('yt-error');el.style.display='block';el.className='yt-error';el.textContent='Erro: '+e.message;document.getElementById('yt-list').innerHTML='';}btn.textContent='↻ Atualizar';btn.style.opacity='1';}
+function renderYouTube(data){const ch=data.channel;const stats=ch.statistics;const snippet=ch.snippet;const initial=(snippet.title||'C').charAt(0).toUpperCase();document.getElementById('channel-info-box').innerHTML=`<div class="channel-info"><div class="channel-avatar">${initial}</div><div><div class="channel-name">${snippet.title}</div><div class="channel-subs">${parseInt(stats.subscriberCount||0).toLocaleString('pt-BR')} inscritos · ${parseInt(stats.viewCount||0).toLocaleString('pt-BR')} views totais · ${parseInt(stats.videoCount||0).toLocaleString('pt-BR')} vídeos</div></div></div>`;if(state.ytCacheTime){const d=new Date(state.ytCacheTime);document.getElementById('yt-last-updated').textContent='Atualizado em: '+d.toLocaleString('pt-BR');}const videos=data.videos||[];if(!videos.length){document.getElementById('yt-list').innerHTML='<div class="empty-state">Nenhum vídeo encontrado.</div>';return;}document.getElementById('yt-list').innerHTML=videos.map(v=>{const s=v.statistics||{};const sn=v.snippet||{};const views=parseInt(s.viewCount||0).toLocaleString('pt-BR');const likes=parseInt(s.likeCount||0).toLocaleString('pt-BR');const comments=parseInt(s.commentCount||0).toLocaleString('pt-BR');const date=new Date(sn.publishedAt).toLocaleDateString('pt-BR');const thumb=sn.thumbnails?.medium?.url||sn.thumbnails?.default?.url||'';return`<div class="yt-card"><div class="yt-card-top">${thumb?`<img class="yt-thumb" src="${thumb}" alt="" />`:'<div class="yt-thumb"></div>'}<div class="yt-info"><div class="yt-title">${sn.title||''}</div><div class="yt-date">Publicado em ${date}</div></div></div><div class="yt-stats"><div class="yt-stat">👁 <span class="yt-stat-val">${views}</span> views</div><div class="yt-stat">👍 <span class="yt-stat-val">${likes}</span> likes</div><div class="yt-stat">💬 <span class="yt-stat-val">${comments}</span> comentários</div></div></div>`;}).join('');}
+function renderMetrics(){const hours=state.hours||0;const subs=state.ytSubs||0;const views=state.ytViews||0;const videos=state.ytVideos||0;document.getElementById('m-hours').textContent=hours.toLocaleString('pt-BR');document.getElementById('m-subs').textContent=subs.toLocaleString('pt-BR');document.getElementById('m-views').textContent=views.toLocaleString('pt-BR');document.getElementById('m-videos').textContent=videos||'—';const ph=Math.min(Math.round(hours/40),100);const ps=Math.min(Math.round(subs/10),100);document.getElementById('bar-hours').style.width=ph+'%';document.getElementById('bar-subs').style.width=ps+'%';document.getElementById('pct-hours').textContent=ph+'%';document.getElementById('pct-subs').textContent=(subs/10).toFixed(1)+'%';}
+function updateHours(){const h=parseFloat(document.getElementById('inp-hours').value);if(!isNaN(h)){state.hours=h;document.getElementById('inp-hours').value='';saveState();renderMetrics();}}
 function renderUpcoming(){const pending=state.tasks.filter(t=>!t.done).slice(0,3);const el=document.getElementById('upcoming-list');if(!pending.length){el.innerHTML='<div class="empty-state">Nenhuma tarefa pendente 🎉</div>';return;}el.innerHTML=pending.map(t=>taskHTML(t)).join('');}
 const tagClass={PT:'tag-pt',ES:'tag-es',Geral:'tag-geral'};
 function taskHTML(t){return`<div class="task-item ${t.done?'done':''}" onclick="toggleTask(${t.id})"><div class="task-check">${t.done?'✓':''}</div><div style="flex:1"><div class="task-name">${t.text}</div><div class="task-meta"><span class="task-tag ${tagClass[t.tag]||'tag-geral'}">${t.tag}</span></div></div></div>`;}
 function renderTasks(){const el=document.getElementById('task-list');el.innerHTML=state.tasks.map(t=>taskHTML(t)).join('')||'<div class="empty-state">Nenhuma tarefa.</div>';}
 function toggleTask(id){const t=state.tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveState();renderTasks();renderUpcoming();}}
 function addTask(){const text=document.getElementById('inp-task').value.trim();const tag=document.getElementById('inp-task-tag').value;if(!text)return;state.tasks.push({id:Date.now(),text,tag,done:false});document.getElementById('inp-task').value='';saveState();renderTasks();renderUpcoming();}
-function updateMetrics(){const h=parseFloat(document.getElementById('inp-hours').value);const s=parseFloat(document.getElementById('inp-subs').value);const v=parseFloat(document.getElementById('inp-videos').value);if(!isNaN(h))state.metrics.hours=h;if(!isNaN(s))state.metrics.subs=s;if(!isNaN(v))state.metrics.videos=v;document.getElementById('inp-hours').value='';document.getElementById('inp-subs').value='';document.getElementById('inp-videos').value='';saveState();renderMetrics();}
 const calEvents={2:[{label:'Vídeo 1 publicado',cls:'pill-done'}],6:[{label:'Vídeo 2 publicado',cls:'pill-done'}],9:[{label:'Vídeo 3 publicado',cls:'pill-done'}],10:[{label:'Início do plano',cls:'pill-task'}],14:[{label:'Publicar PT',cls:'pill-pt'}],17:[{label:'Publicar PT',cls:'pill-pt'}],21:[{label:'Publicar PT',cls:'pill-pt'}],24:[{label:'Publicar PT',cls:'pill-pt'},{label:'Lançar canal ES',cls:'pill-es'}],28:[{label:'Publicar PT',cls:'pill-pt'}],31:[{label:'Publicar PT',cls:'pill-pt'},{label:'Publicar ES',cls:'pill-es'}]};
 function renderCalendar(){const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let html=days.map(d=>`<div class="cal-header">${d}</div>`).join('');for(let i=0;i<5;i++)html+='<div class="cal-day empty"></div>';for(let d=1;d<=31;d++){const evs=calEvents[d]||[];html+=`<div class="cal-day ${d===9?'today':''}"><div class="cal-day-num">${d}</div>${evs.map(e=>`<div class="event-pill ${e.cls}">${e.label}</div>`).join('')}</div>`;}document.getElementById('cal-grid').innerHTML=html;}
-function renderRoadmap(){const el=document.getElementById('roadmap-list');el.innerHTML=state.roadmap.map(r=>`<div class="roadmap-item ${r.done?'done-milestone':''}"><div class="roadmap-dot ${r.done?'dot-done':r.id===1?'dot-current':'dot-future'}"></div><div class="roadmap-content"><div class="roadmap-period">${r.period}</div><div class="roadmap-goal">${r.goal}</div><div class="roadmap-detail">${r.detail}</div></div><button class="complete-btn" onclick="toggleMilestone(${r.id})">${r.done?'Desfazer':'Concluir'}</button></div>`).join('');}
+function renderRoadmap(){document.getElementById('roadmap-list').innerHTML=state.roadmap.map(r=>`<div class="roadmap-item ${r.done?'done-milestone':''}"><div class="roadmap-dot ${r.done?'dot-done':r.id===1?'dot-current':'dot-future'}"></div><div class="roadmap-content"><div class="roadmap-period">${r.period}</div><div class="roadmap-goal">${r.goal}</div><div class="roadmap-detail">${r.detail}</div></div><button class="complete-btn" onclick="toggleMilestone(${r.id})">${r.done?'Desfazer':'Concluir'}</button></div>`).join('');}
 function toggleMilestone(id){const r=state.roadmap.find(r=>r.id===id);if(r){r.done=!r.done;saveState();renderRoadmap();}}
-function addVideo(){const title=document.getElementById('inp-vtitle').value.trim();const date=document.getElementById('inp-vdate').value.trim();const channel=document.getElementById('inp-vchannel').value;if(!title)return;state.videos.push({id:Date.now(),title,date:date||'—',channel,views:0});document.getElementById('inp-vtitle').value='';document.getElementById('inp-vdate').value='';saveState();renderVideos();}
-function renderVideos(){const el=document.getElementById('video-list');if(!state.videos.length){el.innerHTML='<div class="empty-state">Nenhum vídeo registrado.</div>';return;}const ch={PT:'background:#E1F5EE;color:#0F6E56',ES:'background:#E6F1FB;color:#185FA5',EN:'background:#FAEEDA;color:#854F0B'};el.innerHTML=[...state.videos].reverse().map(v=>`<div class="video-item"><div class="video-date">${v.date}</div><span class="channel-badge" style="${ch[v.channel]||ch.PT}">${v.channel}</span><div class="video-title">${v.title}</div>${v.views?`<div class="video-stat">${v.views.toLocaleString('pt-BR')} views</div>`:''}</div>`).join('');}
-const SYSTEM_PROMPT=`Você é um mentor e assistente de crescimento para um criador de conteúdo brasileiro no YouTube.\n\nContexto:\n- Canal principal: Relatos Realistas (amor, traição e vingança) — narração sem rosto, ficção\n- Canal ES planejado para maio 2026, canal EN no futuro\n- Meta: 4.000 horas assistidas + 1.000 inscritos para AdSense\n- Progresso: 3 vídeos, 441h assistidas, 23 inscritos\n- Vídeo de 06/05 foi hit com 2.451 views em 3 dias\n- Publicações: quartas e sábados\n\nResponda sempre em português brasileiro, de forma direta e prática.`;
+const SYSTEM_PROMPT=`Você é um mentor e assistente de crescimento para um criador de conteúdo brasileiro no YouTube.\n\nContexto:\n- Canal principal: Relatos Realistas (amor, traição e vingança) — narração sem rosto, ficção\n- Canal ES planejado para maio 2026, canal EN no futuro\n- Meta: 4.000 horas assistidas + 1.000 inscritos para AdSense\n- Vídeo de 06/05 foi hit com 2.451 views em 3 dias\n- Publicações: quartas e sábados\n\nResponda sempre em português brasileiro, de forma direta e prática.`;
 async function sendChat(){const input=document.getElementById('chat-input');const text=input.value.trim();if(!text)return;const btn=document.getElementById('send-btn');btn.disabled=true;input.value='';state.chatHistory.push({role:'user',content:text});const history=document.getElementById('chat-history');history.innerHTML+=`<div class="chat-msg msg-user">${text}</div>`;history.innerHTML+=`<div class="chat-msg msg-ai msg-thinking" id="thinking-msg">Pensando...</div>`;history.scrollTop=history.scrollHeight;try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:state.chatHistory})});const data=await res.json();const reply=data.content?.map(b=>b.text||'').join('')||'Erro.';state.chatHistory.push({role:'assistant',content:reply});document.getElementById('thinking-msg').outerHTML=`<div class="chat-msg msg-ai">${reply.replace(/\n/g,'<br>')}</div>`;}catch(e){document.getElementById('thinking-msg').outerHTML=`<div class="chat-msg msg-ai" style="color:#c0392b">Erro de conexão.</div>`;}history.scrollTop=history.scrollHeight;btn.disabled=false;if(state.chatHistory.length>20)state.chatHistory=state.chatHistory.slice(-20);saveState();}
 loadState();
 </script>
